@@ -39,7 +39,7 @@ class cpu():
 		memory[i] = fontset[i]
 		i += 1
 	
-	with open('games/'+"MAZE","rb") as f:
+	with open('games/'+"PONG","rb") as f:
 		i = 0
 		rom = f.read()
 		
@@ -59,12 +59,12 @@ class cpu():
 		print (V)
 		print(opcode)
 		if opcode [:3] == "0x0":
-			if opcode == "0e00":
+			if opcode == "e00":
 				screen.fill((0,0,0))
 				pc += 2
 			elif opcode == "0ee":
 				sp -= 1 
-				pc = stack.pop()
+				pc = stack[0]
 				pc += 2
 			
 		elif opcode[:3] == "0x1":
@@ -79,14 +79,14 @@ class cpu():
 			
 		elif opcode[:3] == "0x3":
 			x = int(opcode[3],16)
-			if str(hex(V[x])[2:]) == str(int(opcode [4:])):
+			if int(hex(V[x])[2:],16) == int(str(opcode [4:]),16):
 				pc += 4
 			else :
 				pc += 2
 			
 		elif opcode[:3] == "0x4":
 			x = int(opcode[3],16)
-			if str(hex(V[x])[2:]) != str(int(opcode [4:])):
+			if int(hex(V[x])[2:],16) != int(str(opcode [4:]),16):
 				pc += 2
 			pc += 2
 			
@@ -195,7 +195,8 @@ class cpu():
 				pc += 2
 			elif opcode [4:] == "a1":
 				pc += 2
-				
+			elif opcode [2:] == "e0":
+				pc += 2
 		elif opcode[:3] == "0xf":
 			
 			if opcode[4:] == "07":
