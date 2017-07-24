@@ -38,11 +38,11 @@ class cpu():
 		memory[i] = fontset[i]
 		i += 1
 	
-	with open('games/'+"MAZE","rb") as f:
+	with open('games/'+"MAZE2","rb") as f:
 		i = 0
 		rom = f.read()
 		
-		while i < len (rom) -1: 
+		while i <= len (rom) -1: 
 			memory[i+pc] = rom[i]
 			i += 1
 		
@@ -51,6 +51,7 @@ class cpu():
 			memory[i] = hex(memory[i])
 			memory[i] = int(memory[i], 16) 
 			i += 1
+	print (memory)
 	while pc < len(rom)+ 0x200:
 		opcode = int(hex(memory[pc]<<8),16)| int(hex(memory[pc + 1]),16)
 		opcode = hex(opcode)
@@ -68,8 +69,7 @@ class cpu():
 				
 			
 		elif opcode[:3] == "0x1":
-			pc = opcode [3:] 
-			pc = int(pc,16)
+			pc = int(opcode [3:],16) 
 			
 			
 		elif opcode [:3] == "0x2":
@@ -182,12 +182,13 @@ class cpu():
 				V[y] = V[y] % 31
 			while pc < saved_VI + n :
 				VI = memory[pc]
-				es = list(bin(VI)[2:].zfill(8))
+				print(VI)
+				es = list(bin(VI)[2:].zfill(8))	
 				pc +=1
 				sprite_buffer.extend(es)
 			sprite_buffer = np.asarray(sprite_buffer,dtype=int).reshape(n,8)
 			sprite_buffer = sprite_buffer * 255
-			print (sprite_buffer)
+			
 			surface = pygame.pixelcopy.make_surface(sprite_buffer)
 			surface = pygame.transform.scale(surface,(n*10,80))
 			screen.blit(surface,(V[x]*10,V[y]*10))
