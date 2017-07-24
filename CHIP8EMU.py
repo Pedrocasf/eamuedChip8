@@ -2,6 +2,7 @@ import pygame
 import sys
 import random
 import numpy as np
+import time
 pygame.init()
 class cpu():
 	key = [0]*17
@@ -39,7 +40,7 @@ class cpu():
 		memory[i] = fontset[i]
 		i += 1
 	
-	with open('games/'+"MAZE","rb") as f:
+	with open('games/'+"VERS","rb") as f:
 		i = 0
 		rom = f.read()
 		
@@ -52,54 +53,52 @@ class cpu():
 			memory[i] = hex(memory[i])
 			memory[i] = int(memory[i], 16) 
 			i += 1
-	while pc < len(rom)+ 0x200:
+	while True:
 		opcode = int(hex(memory[pc]<<8),16)| int(hex(memory[pc + 1]),16)
 		opcode = hex(opcode)
 		opcode = str(opcode)
-		pc +=2
-		if opcode [:3] == "0x0":
-			if opcode == "0x00e0":
-				screen.fill((0,0,0))
-				
-			elif opcode == "0x00ee":
-				sp -= 1 
-				pc = stack[0]
-				
-		elif opcode[:3] == "0x1":
+		print(opcode)
+		print (pc)
+		if opcode[:3] == "0x0":
+			pc +=2
+			
+		if opcode[:3] == "0x1":
 			pc = int(opcode [3:],16) 
-				
+			
 		elif opcode [:3] == "0x2":
 			sp +=1
-			stack [0] = pc
+			stack [sp] = pc
 			pc = int(opcode[3:],16)
 			
 		elif opcode[:3] == "0x3":
+			
 			x = int(opcode[3],16)
 			if int(hex(V[x])[2:],16) == int(str(opcode [4:]),16):
 				pc +=  2
-				
+			pc +=2	
+		
 		elif opcode[:3] == "0x4":
 			x = int(opcode[3],16)
 			if int(hex(V[x])[2:],16) != int(str(opcode [4:]),16):
 				pc += 2
-			
+			pc +=2
 			
 		elif opcode[:3] == "0x5":
 			x = int(opcode[3],16)
 			y = int(opcode[4],16)
 			if V[x] == V[y]:
 				pc += 2
-			
+			pc +=2
 			
 		elif opcode [:3] == "0x6":
 			x = int(opcode[3],16)
 			V[x] = int(opcode[4:],16)
-			
+			pc +=2
 			
 		elif opcode[:3] == "0x7":
 			x = int(opcode [3],16)
 			V[x] = V[x] + int(opcode [4:],16)
-			
+			pc +=2
 			
 		elif opcode[:3] == "0x8":
 			
@@ -107,23 +106,25 @@ class cpu():
 				x = int(opcode[3],16)
 				y = int(opcode [4],16)
 				V[x] = V[y]
-				
+				pc +=2
 			
 			elif opcode [5] == "1":
 				x = int(opcode[3],16)
 				y = int (opcode[4],16)
 				V[x] = V[x] | V[y]
-				
+				pc +=2
 				
 			elif opcode [5] == "2":
 				x = int(opcode[3],16)
 				y = int(opcode[4],16)
 				V[x] = V[x] & V[y]
+				pc +=2
 				
 			elif opcode [5] == "3":
 				x = int(opcode[3],16)
 				y = int(opcode[4],16)
 				V[x] = V[x] ^ V[y]
+				pc +=2
 				
 			elif opcode [5] == "4":
 				x = int(opcode[3],16)
@@ -132,6 +133,7 @@ class cpu():
 				if V[x] > 255:
 					V[0xf] = 1
 					V[x] = int(bin(V[x])[-4:])
+				pc +=2
 				
 			elif opcode [5] == "5":
 				x = int(opcode[3],16)
@@ -141,6 +143,7 @@ class cpu():
 				else:
 					V[0xf] = 0
 				V[x] = V[x] - V[y]
+				pc +=2
 				
 			elif opcode [5] == "6":
 				x = int(opcode[3],16)
@@ -150,6 +153,8 @@ class cpu():
 				else :
 					V[0xf] = 0
 				V[x] = V[x]//2
+				pc +=2
+				
 			elif opcode [5] == "7":
 				x = int(opcode[3],16)
 				y = int(opcode[4],16)
@@ -158,6 +163,7 @@ class cpu():
 				else:
 					V[0xf] = 0
 				V[x] = V[y] - V[x]
+				pc +=2
 				
 			elif opcode [5] == "e":
 				x = int(opcode[3],16)
@@ -167,21 +173,27 @@ class cpu():
 				else :
 					V[0xf] = 0
 				V[x] = V[x]*2
+				pc +=2
+				
 		elif opcode[:3] == "0x9":
 			x = int(opcode[3],16)
 			y = int(opcode[4],16)
 			if V[x] != V[y]:
 				pc += 2
+			pc +=2
+		
 		elif opcode[:3] == "0xa":
 			VI = int(opcode[3:],16)
-			
+			pc +=2
+	
 		elif opcode[:3] == "0xb":
 			pc = int(opcode[3:],16)+V[0]
-			
+			pc +=2
+	
 		elif opcode[:3] == "0xc":
 			x = int(opcode[3],16)
-			V[x] =  random.randint(0,255) & int(opcode[4:])
-			
+			V[x] =  random.randint(0,255) & int(opcode[4:],16)
+			pc +=2
 		
 		elif opcode[:3] == "0xd":
 			n = int(opcode[5],16)
@@ -207,50 +219,67 @@ class cpu():
 			surface = pygame.pixelcopy.make_surface(sprite_buffer)
 			surface = pygame.transform.scale(surface,(n*10,80))
 			surface = pygame.transform.rotate(surface,90)
+			surface = pygame.transform.flip(surface,False,True)
 			screen.blit(surface,(V[x]*10,V[y]*10))
 			pygame.display.update()
 			VI = saved_VI 	
-			pc = saved_pc
+			pc = saved_pc +2
 
 		elif opcode[:3] == "0xe":
 			
-			if opcode [4:] == "9e":
+			if opcode == "0xee":
+				sp -= 1 
+				pc = stack[sp]
+				pc +=2
+			
+			elif opcode == "0xe0":
+				screen.fill((0,0,0))
+				pc +=2
+			
+			elif opcode [4:] == "9e":
 				x = int(opcode[3],16) 
 				if key[V[x]] == True:
 					pc += 2
-					
+				pc +=2	
+				
 			elif opcode [4:] == "a1":
 				x = int(opcode[3],16)
 				if key[V[x]] == False:
 					pc += 2
-					
+				pc +=2
 				
 		elif opcode[:3] == "0xf":
 			
 			if opcode[4:] == "07":
 				x = int(opcode[3],16)
 				V[x] = dt
+				pc +=2
 				
 			elif opcode[4:] == "0a":
 				x = int(opcode[3],16)
 				while pygame.key.get_pressed() == False:
 					pass
-					
+				pc +=2
+				
 			elif opcode[4:] == "15":
 				x = int(opcode[3],16)
 				dt = V[x]
+				pc +=2
 				
 			elif opcode[4:] == "18":
 				x = int(opcode[3],16)
 				st = V[x]
+				pc +=2
 				
 			elif opcode[4:] == "1e":
 				x = int(opcode[3],16)
 				VI = VI + V[x]
+				pc +=2
 				
 			elif opcode[4:] == "29":
 				x = int(opcode[3],16)
 				VI = V[x] *5
+				pc +=2
 				
 			elif opcode[4:] == "33":
 				x = int(opcode[3],16)
@@ -260,15 +289,27 @@ class cpu():
 					memory[VI+1] = int(V[x][1])
 				if len (V[x]) >= 3:
 					memory[VI+2] = int(V[x][2])
+				pc +=2
+				
 			elif opcode[4:] == "55":
 				x = int(opcode[3],16)
 				i = 0
 				while i < x:
 					memory[VI+i] = V[i]
 					i += 1
+				pc +=2
+				
 			elif opcode[4:] == "65":
 				x = int(opcode[3],16)
 				i = 0
 				while i < x:
 					V[i] = memory[VI+i]
 					i += 1
+				pc +=2
+		
+		if dt > 0 :
+			time.sleep(0.1666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666)	
+			dt -= 1
+		if st > 0 :
+			time.sleep(0.1666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666)	
+			st -= 1		
