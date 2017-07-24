@@ -8,6 +8,8 @@ class cpu():
 	key = [0]*17
 	screen = pygame.display.set_mode((640,320)) 
 	memory = [0]*4096
+	surface_array = [0]*32*64
+	surface_array = np.asarray(surface_array,dtype=int).reshape(32,64)
 	i = 0
 	V =[0]*16
 	st = 0
@@ -40,7 +42,7 @@ class cpu():
 		memory[i] = fontset[i]
 		i += 1
 	
-	with open('games/'+"VERS","rb") as f:
+	with open('games/'+"INVADERS","rb") as f:
 		i = 0
 		rom = f.read()
 		
@@ -188,7 +190,6 @@ class cpu():
 	
 		elif opcode[:3] == "0xb":
 			pc = int(opcode[3:],16)+V[0]
-			pc +=2
 	
 		elif opcode[:3] == "0xc":
 			x = int(opcode[3],16)
@@ -216,7 +217,9 @@ class cpu():
 				sprite_buffer.extend(es)
 			sprite_buffer = np.asarray(sprite_buffer,dtype=int).reshape(n,8)
 			sprite_buffer = sprite_buffer * 255
-			surface = pygame.pixelcopy.make_surface(sprite_buffer)
+			surface_array = surface_array ^ sprite_buffer
+			surface = pygame.pixelcopy.make_surface(surface_array)
+			
 			surface = pygame.transform.scale(surface,(n*10,80))
 			surface = pygame.transform.rotate(surface,90)
 			surface = pygame.transform.flip(surface,False,True)
@@ -230,10 +233,9 @@ class cpu():
 			if opcode == "0xee":
 				sp -= 1 
 				pc = stack[sp]
-				pc +=2
 			
 			elif opcode == "0xe0":
-				screen.fill((0,0,0))
+				surface_array = np.zeros (64,32)
 				pc +=2
 			
 			elif opcode [4:] == "9e":
@@ -289,6 +291,7 @@ class cpu():
 					memory[VI+1] = int(V[x][1])
 				if len (V[x]) >= 3:
 					memory[VI+2] = int(V[x][2])
+				V[x] = int(V[x]) 
 				pc +=2
 				
 			elif opcode[4:] == "55":
@@ -308,8 +311,8 @@ class cpu():
 				pc +=2
 		
 		if dt > 0 :
-			time.sleep(0.1666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666)	
+			time.sleep(0.16)	
 			dt -= 1
 		if st > 0 :
-			time.sleep(0.1666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666)	
+			time.sleep(0.16)	
 			st -= 1		
