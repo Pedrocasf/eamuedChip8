@@ -5,7 +5,7 @@ import numpy as np
 import time
 pygame.init()
 class cpu():
-	key = [0]*17
+	key{0x0 = }
 	screen = pygame.display.set_mode((1280,640)) 
 	memory = [0]*4096
 	surface_array = [0]*32*64
@@ -42,7 +42,7 @@ class cpu():
 		memory[i] = fontset[i]
 		i += 1
 	
-	with open('games/'+"TETRIS","rb") as f:
+	with open('games/'+"VBRIX","rb") as f:
 		i = 0
 		rom = f.read()
 		
@@ -55,21 +55,23 @@ class cpu():
 			memory[i] = hex(memory[i])
 			memory[i] = int(memory[i], 16) 
 			i += 1
+			
 	while True:
 		opcode = int(hex(memory[pc]<<8),16)| int(hex(memory[pc + 1]),16)
 		opcode = hex(opcode)
 		opcode = str(opcode)
+		print(pc)
 		print(opcode)
-		print (pc)
+		
 		if opcode[:3] == "0x0":
 			pc +=2
 			
-		if opcode[:3] == "0x1":
+		elif opcode[:3] == "0x1":
 			pc = int(opcode [3:],16) 
 			
 		elif opcode [:3] == "0x2":
-			stack [sp] = pc
 			sp +=1
+			stack [sp] = pc
 			pc = int(opcode[3:],16)
 			
 		elif opcode[:3] == "0x3":
@@ -202,8 +204,6 @@ class cpu():
 			y = int(opcode[4],16)
 			saved_x = V[x]
 			saved_y = V[y]
-			print(V[x])
-			print(V[y])
 			V[0xf] = 0
 			saved_pc = pc
 			pc = VI
@@ -231,8 +231,9 @@ class cpu():
 					V[y] = (V[y]+height) % 31
 				while height != n:
 					surface_array[V[y]+height,V[x]+width] = surface_array[V[y]+height,V[x]+width] ^ sprite_buffer[height,width] 
+					if surface_array[V[y]+height,V[x]+width] != 0 & sprite_buffer[height,width] != 0:
+						V[0xf]= 1
 					height += 1
-
 				width += 1
 				
 			surface = pygame.pixelcopy.make_surface(surface_array)
@@ -249,12 +250,13 @@ class cpu():
 		elif opcode[:3] == "0xe":
 			
 			if opcode == "0xee":
-				pc = stack[0]
+				pc = stack[sp]
 				sp -= 1 
 				
 			
 			elif opcode == "0xe0":
-				surface_array = np.zeros (64,32)
+				surface_array = [0]*32*64
+				surface_array = np.asarray(surface_array,dtype=int).reshape(32,64)
 				pc +=2
 			
 			elif opcode [4:] == "9e":
