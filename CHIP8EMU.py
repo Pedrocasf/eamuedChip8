@@ -6,7 +6,7 @@ import time
 pygame.init()
 class cpu():
 	key = [0]*17
-	screen = pygame.display.set_mode((640,320)) 
+	screen = pygame.display.set_mode((1280,640)) 
 	memory = [0]*4096
 	surface_array = [0]*32*64
 	surface_array = np.asarray(surface_array,dtype=int).reshape(32,64)
@@ -42,7 +42,7 @@ class cpu():
 		memory[i] = fontset[i]
 		i += 1
 	
-	with open('games/'+"INVADERS","rb") as f:
+	with open('games/'+"TETRIS","rb") as f:
 		i = 0
 		rom = f.read()
 		
@@ -68,8 +68,8 @@ class cpu():
 			pc = int(opcode [3:],16) 
 			
 		elif opcode [:3] == "0x2":
-			sp +=1
 			stack [sp] = pc
+			sp +=1
 			pc = int(opcode[3:],16)
 			
 		elif opcode[:3] == "0x3":
@@ -200,6 +200,10 @@ class cpu():
 			n = int(opcode[5],16)
 			x = int (opcode[3],16)
 			y = int(opcode[4],16)
+			saved_x = V[x]
+			saved_y = V[y]
+			print(V[x])
+			print(V[y])
 			V[0xf] = 0
 			saved_pc = pc
 			pc = VI
@@ -217,22 +221,37 @@ class cpu():
 				sprite_buffer.extend(es)
 			sprite_buffer = np.asarray(sprite_buffer,dtype=int).reshape(n,8)
 			sprite_buffer = sprite_buffer * 255
-			surface_array = surface_array ^ sprite_buffer
-			surface = pygame.pixelcopy.make_surface(surface_array)
+			width = 0
 			
-			surface = pygame.transform.scale(surface,(n*10,80))
+			while width !=7:
+				height = 0
+				if V[x] + width > 63:
+					V[x] = (V[x]+width) % 63
+				if V[y] + height >  31:
+					V[y] = (V[y]+height) % 31
+				while height != n:
+					surface_array[V[y]+height,V[x]+width] = surface_array[V[y]+height,V[x]+width] ^ sprite_buffer[height,width] 
+					height += 1
+
+				width += 1
+				
+			surface = pygame.pixelcopy.make_surface(surface_array)
+			surface = pygame.transform.scale(surface,(640,1280))
 			surface = pygame.transform.rotate(surface,90)
 			surface = pygame.transform.flip(surface,False,True)
-			screen.blit(surface,(V[x]*10,V[y]*10))
+			screen.blit(surface,(0,0))
 			pygame.display.update()
 			VI = saved_VI 	
 			pc = saved_pc +2
+			V[x] = saved_x
+			V[y] = saved_y
 
 		elif opcode[:3] == "0xe":
 			
 			if opcode == "0xee":
+				pc = stack[0]
 				sp -= 1 
-				pc = stack[sp]
+				
 			
 			elif opcode == "0xe0":
 				surface_array = np.zeros (64,32)
