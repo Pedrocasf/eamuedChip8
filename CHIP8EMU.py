@@ -5,8 +5,23 @@ import numpy as np
 import time
 pygame.init()
 class cpu():
-	key{0x0 = }
-	screen = pygame.display.set_mode((1280,640)) 
+	key={0 :pygame.K_1,
+		1 :pygame.K_2,
+		2	:pygame.K_3,
+		3 :pygame.K_4,
+		4	:pygame.K_q,
+		5	:pygame.K_w,
+		6	:pygame.K_e,
+		7	:pygame.K_r,
+		8	:pygame.K_a,
+		9	:pygame.K_s,
+		10	:pygame.K_d,
+		11	:pygame.K_f,
+		12	:pygame.K_z,
+		13	:pygame.K_x,
+		14	:pygame.K_c,
+		15	:pygame.K_v,}
+	screen = pygame.display.set_mode((640,320)) 
 	memory = [0]*4096
 	surface_array = [0]*32*64
 	surface_array = np.asarray(surface_array,dtype=int).reshape(32,64)
@@ -42,7 +57,7 @@ class cpu():
 		memory[i] = fontset[i]
 		i += 1
 	
-	with open('games/'+"VBRIX","rb") as f:
+	with open('games/'+"BRIX","rb") as f:
 		i = 0
 		rom = f.read()
 		
@@ -233,11 +248,12 @@ class cpu():
 					surface_array[V[y]+height,V[x]+width] = surface_array[V[y]+height,V[x]+width] ^ sprite_buffer[height,width] 
 					if surface_array[V[y]+height,V[x]+width] != 0 & sprite_buffer[height,width] != 0:
 						V[0xf]= 1
+						print (V[0xf])
 					height += 1
 				width += 1
 				
 			surface = pygame.pixelcopy.make_surface(surface_array)
-			surface = pygame.transform.scale(surface,(640,1280))
+			surface = pygame.transform.scale(surface,(320,640))
 			surface = pygame.transform.rotate(surface,90)
 			surface = pygame.transform.flip(surface,False,True)
 			screen.blit(surface,(0,0))
@@ -280,7 +296,7 @@ class cpu():
 				
 			elif opcode[4:] == "0a":
 				x = int(opcode[3],16)
-				while pygame.key.get_pressed() == False:
+				while pygame.key.get_pressed(keys) == False:
 					pass
 				pc +=2
 				
