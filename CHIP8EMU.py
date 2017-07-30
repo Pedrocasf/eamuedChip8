@@ -5,22 +5,22 @@ import numpy as np
 import time
 pygame.init()
 class cpu():
-	key={0 :pygame.K_1,
-		1 :pygame.K_2,
-		2	:pygame.K_3,
-		3 :pygame.K_4,
-		4	:pygame.K_q,
-		5	:pygame.K_w,
-		6	:pygame.K_e,
-		7	:pygame.K_r,
-		8	:pygame.K_a,
-		9	:pygame.K_s,
-		10	:pygame.K_d,
-		11	:pygame.K_f,
-		12	:pygame.K_z,
-		13	:pygame.K_x,
-		14	:pygame.K_c,
-		15	:pygame.K_v,}
+	key={0  :pygame.K_1,
+		 1  :pygame.K_2,
+		 2	:pygame.K_3,
+		 3  :pygame.K_4,
+		 4	:pygame.K_q,
+		 5	:pygame.K_w,
+		 6	:pygame.K_e,
+		 7	:pygame.K_r,
+		 8	:pygame.K_a,
+		 9	:pygame.K_s,
+		 10	:pygame.K_d,
+		 11	:pygame.K_f,
+		 12	:pygame.K_z,
+		 13	:pygame.K_x,
+		 14	:pygame.K_c,
+		 15	:pygame.K_v,}
 	screen = pygame.display.set_mode((640,320)) 
 	memory = [0]*4096
 	surface_array = [0]*32*64
