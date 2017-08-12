@@ -6,7 +6,7 @@ import time
 pygame.init()
 
 class cpu():
-	def __init__():
+	def main():
 		self.key = [0]*16
 		self.screen = pygame.display.set_mode((640,320)) 
 		self.surface_array = np.zeros(64*32)
@@ -50,13 +50,13 @@ class cpu():
 			self.rom = f.read()
 			
 			while i < len (rom) : 
-				self.memory[i+pc] = self.rom[i]
+				self.memory[i+pc] = rom[i]
 				i += 1
 				
 			i = 0
-			while i < len (memory): 
-				memory[i] = hex(memory[i])
-				memory[i] = int(memory[i], 16) 
+			while i < len (self.memory):
+				self.memory[i] = hex(self.memory[i])
+				self.memory[i] = int(self.memory[i], 16)
 				i += 1					
 	
 	def sys_addr(self) :
@@ -144,8 +144,8 @@ class cpu():
 	def sub_vx_vy(self):
 		self.x = int(opcode[3],16)
 		self.y = int(opcode[4],16)
-		if V[x] > V[y] :
-			V[0xf] = 1
+		if self.V[x] > self.V[y] :
+			self.V[0xf] = 1
 		else:
 			V[0xf] = 0
 		V[x] = V[x] - V[y]
@@ -304,43 +304,43 @@ class cpu():
 
 	while True:
 				
-			logical_dictionarie = { '0': ld_vx_vy(self),
-									'1': or_vx_vy(self),
-									'2': and_vx_vy(self),
-									'3': xor_vx_vy(self),
-									'4': add_vx_vy(self),
-									'5': sub_vx_vy(self),
-									'6': shr_vx_vy(self),
-									'7': subn_vx_vy(self),
-									'e': shl_vx_vy(self)}
+			logical_dictionarie = { '0': ld_vx_vy(),
+									'1': or_vx_vy(),
+									'2': and_vx_vy(),
+									'3': xor_vx_vy(),
+									'4': add_vx_vy(),
+									'5': sub_vx_vy(),
+									'6': shr_vx_vy(),
+									'7': subn_vx_vy(),
+									'e': shl_vx_vy()}
 											
-			misc_dictionarie = {'9e' : skp_vx(self),
-								'a1' : sknp_vx(self),
-								'07' : ld_vx_dt(self),
-								'0a' : ld_vx_k(self),
-								'15' : ld_dt_vx(self),
-								'18' : ld_st_vx(self),
-								'1e' : add_i_vx(self),
-								'29' : ld_f_vx(self),
-								'33' : ld_b_vx(self),
-								'55' : ld_i_vx(self),
-								'65' : ld_vx_i(self),
-								'e0' : cls(self),	
-								'ee' : ret(self)}
+			misc_dictionarie = {'9e' : skp_vx(),
+								'a1' : sknp_vx(),
+								'07' : ld_vx_dt(),
+								'0a' : ld_vx_k(),
+								'15' : ld_dt_vx(),
+								'18' : ld_st_vx(),
+								'1e' : add_i_vx(),
+								'29' : ld_f_vx(),
+								'33' : ld_b_vx(),
+								'55' : ld_i_vx(),
+								'65' : ld_vx_i(),
+								'e0' : cls(),
+								'ee' : ret()}
 					
-			opcodes = { 0x1: jp_addr(self),
-						0x2: call_addr(self),
-						0x3: se_vx_byte(self),
-						0x4: sne_vx_byte(self),
-						0x5: se_vx_vy(self),
-						0x6: ld_vx_byte(self),
-						0x7: add_vx_byte(self),
+			opcodes = { 0x1: jp_addr(),
+						0x2: call_addr(),
+						0x3: se_vx_byte(),
+						0x4: sne_vx_byte(),
+						0x5: se_vx_vy(),
+						0x6: ld_vx_byte(),
+						0x7: add_vx_byte(),
 						0x8: logical_dictionarie[opcode[5]],
-						0x9: sne_vx_vy(self),
-						0xa: ld_i_addr(self),
-						0xb: jp_v0_addr(self),
-						0xc: rnd_vx_byte(self),
-						0xd: drw_vx_vy_nibble(self),
+						0x9: sne_vx_vy(),
+						0xa: ld_i_addr(),
+						0xb: jp_v0_addr(),
+						0xc: rnd_vx_byte(),
+						0xd: drw_vx_vy_nibble(),
 						0xe: misc_dictionarie[opcode[-2:]],
 						0xf: misc_dictionarie[opcode[-2:]]}
 
@@ -348,10 +348,10 @@ class cpu():
 			self.opcode = int(hex(self.memory[self.pc]<<8),16)| int(hex(self.memory[self.pc + 1]),16)
 			self.opcode = hex(self.opcode)
 			self.opcode = str(self.opcode)
-			self.extracted_op = int(self.opcode[:3],16)
-			print (opcode)				
-			print(pc)
-			self.opcodes[self.extracted_op]
+			extracted_op = int(self.opcode[:3],16)
+			print (self.opcode)
+			print(self.pc)
+			opcodes[extracted_op]
 			if self.dt > 0 :
 				time.sleep(0.16)	
 				self.dt -= 1
