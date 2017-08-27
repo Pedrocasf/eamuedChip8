@@ -6,24 +6,23 @@ import time
 pygame.init()
 
 class cpu():
-	def main():
-		self.key = [0]*16
-		self.screen = pygame.display.set_mode((640,320)) 
-		self.surface_array = np.zeros(64*32)
-		self.surface_array = np.asarray(surface_array,dtype=int).reshape(32,64)
-		self.memory = [0]*4096
-		self.i = 0
-		self.V =[0]*16
-		self.st = 0
-		self.dt = 0
-		self.VI = 0
-		self.pc = 0x200
-		self.stack = [0] *16
-		self.sp = 0
-		self.x = 0
-		self.y = 0
-		self.opcode = '0x009e'
-		self.fontset =[0xF0, 0x90, 0x90, 0x90, 0xF0,
+	key = [0]*16
+	screen = pygame.display.set_mode((640,320))
+	surface_array = np.zeros(64*32)
+	surface_array = np.asarray(surface_array,dtype=int).reshape(32,64)
+	memory = [0]*4096
+	i = 0
+	V =[0]*16
+	st = 0
+	dt = 0
+	VI = 0
+	pc = 0x200
+	stack = [0] *16
+	sp = 0
+	x = 0
+	y = 0
+	opcode = '0x00e0'
+	fontset =[0xF0, 0x90, 0x90, 0x90, 0xF0,
 				0x20, 0x60, 0x20, 0x20, 0x70,
 				0xF0, 0x10, 0xF0, 0x80, 0xF0,
 				0xF0, 0x10, 0xF0, 0x10, 0xF0,
@@ -41,16 +40,15 @@ class cpu():
 				0xF0, 0x80, 0xF0, 0x80, 0x80]
 		
 	def load(self):
-		while self.i < len (self.fontset):
+		for i in range (len(self.fontset)):
 			self.memory[i] = self.fontset[i]
-			i += 1
 		
-		with open('games/'+"MAZE","rb") as f:
+		with open('games/'+"BRIX","rb") as f:
 			i = 0
-			self.rom = f.read()
+			rom = f.read()
 			
 			while i < len (rom) : 
-				self.memory[i+pc] = rom[i]
+				self.memory[i+self.pc] = rom[i]
 				i += 1
 				
 			i = 0
@@ -67,7 +65,7 @@ class cpu():
 		self.pc +=2
 		
 	def ret(self) :
-		self.pc = stack[sp]
+		self.pc = self.stack[self.sp]
 		self.sp -= 1 
 		self.pc += 2
 					
@@ -76,7 +74,7 @@ class cpu():
 			
 	def call_addr(self) :
 		self.sp +=1
-		self.stack[sp] = self.pc
+		self.stack[self.sp] = self.pc
 		self.pc = int(self.opcode[3:],16)
 			
 	def se_vx_byte(self) :
@@ -92,269 +90,294 @@ class cpu():
 		self.pc +=2
 			
 	def se_vx_vy(self) :
-		self.x = int(opcode[3],16)
-		self.y = int(opcode[4],16)
-		if self.V[self.x] == self.V[self.y]:
+		x = int(self.opcode[3],16)
+		y = int(self.opcode[4],16)
+		if self.V[x] == self.V[y]:
 			self.pc += 2
 		self.pc +=2
 			
 	def ld_vx_byte(self) :
-		self.x = int(self.opcode[3],16)
-		self.V[self.x] = int(self.opcode[4:],16)
+		x = int(self.opcode[3],16)
+		self.V[x] = int(self.opcode[4:],16)
 		self.pc +=2
 			
 	def add_vx_byte(self) :
-		self.x = int(opcode [3],16)
+		x = int(self.opcode [3],16)
 		self.V[self.x] = self.V[self.x] + int(self.opcode [4:],16)
 		self.pc +=2
 		
 	def ld_vx_vy(self):
-		self.x = int(self.opcode[3],16)
-		self.y = int(self.opcode [4],16)
+		x = int(self.opcode[3],16)
+		y = int(self.opcode [4],16)
 		self.V[self.x] = self.V[self.y]
 		self.pc +=2
 			
 	def or_vx_vy(self):
-		self.x = int(self.opcode[3],16)
-		self.y = int (self.opcode[4],16)
-		self.V[self.x] = self.V[self.x] | self.V[self.y]
+		x = int(self.opcode[3],16)
+		y = int (self.opcode[4],16)
+		self.V[x] = self.V[x] | self.V[y]
 		self.pc +=2
 				
 	def and_vx_vy(self):
-		self.x = int(self.opcode[3],16)
-		self.y = int(self.opcode[4],16)
-		self.V[self.x] = self.V[self.x] & self.V[self.y]
+		x = int(self.opcode[3],16)
+		y = int(self.opcode[4],16)
+		self.V[x] = self.V[x] & self.V[y]
 		self.pc +=2
 				
 	def xor_vx_vy(self):
-		self.x = int(self.opcode[3],16)
-		self.y = int(self.opcode[4],16)
-		self.V[x] = self.V[self.x] ^ self.V[self.y]
+		x = int(self.opcode[3],16)
+		y = int(self.opcode[4],16)
+		self.V[x] = self.V[x] ^ self.V[y]
 		self.pc +=2
 				
 	def add_vx_vy(self):
-		self.x = int(opcode[3],16)
-		self.y = int(opcode[4],16)
-		self.V[self.x] = V[self.x] + V[self.y]
-		if self.V[self.x] > 255:
+		x = int(self.opcode[3],16)
+		y = int(self.opcode[4],16)
+		self.V[x] = self.V[x] + self.V[y]
+		if self.V[x] > 255:
 			self.V[0xf] = 1
-			self.V[self.x] = int(bin(self.V[self.x])[-4:])
+			self.V[x] = int(bin(self.V[x])[-4:])
 		self.pc +=2
 				
 	def sub_vx_vy(self):
-		self.x = int(opcode[3],16)
-		self.y = int(opcode[4],16)
+		x = int(self.opcode[3],16)
+		y = int(self.opcode[4],16)
 		if self.V[x] > self.V[y] :
 			self.V[0xf] = 1
 		else:
-			V[0xf] = 0
-		V[x] = V[x] - V[y]
-		pc +=2
+			self.V[0xf] = 0
+			self.V[x] = self.V[x] - self.V[y]
+		self.pc +=2
 				
 	def shr_vx_vy(self):
-		x = int(opcode[3],16)
-		y = int(opcode[4],16)
-		if bin(V[x])[-0:] == 1:
-			V[0xf] = 1
+		x = int(self.opcode[3],16)
+		y = int(self.opcode[4],16)
+		if bin(self.V[x])[-0:] == 1:
+			self.V[0xf] = 1
 		else :
-			V[0xf] = 0
-		V[x] = V[x]//2
-		pc +=2
+			self.V[0xf] = 0
+			self.V[x] = self.V[x]//2
+		self.pc +=2
 				
 	def subn_vx_vy(self):
-		x = int(opcode[3],16)
-		y = int(opcode[4],16)
-		if V[y] > V[x] :
-			V[0xf] = 1
+		x = int(self.opcode[3],16)
+		y = int(self.opcode[4],16)
+		if self.V[y] >self. V[x] :
+			self.V[0xf] = 1
 		else:
-			V[0xf] = 0
-		V[x] = V[y] - V[x]
-		pc +=2
+			self.V[0xf] = 0
+			self.V[x] = self.V[y] - self.V[x]
+		self.pc +=2
 				
 	def shl_vx_vy(self):
-		x = int(opcode[3],16)
-		y = int(opcode[4],16)
-		if bin(V[x])[0:] == 1:
-			V[0xf] = 1
+		x = int(self.opcode[3],16)
+		y = int(self.opcode[4],16)
+		if bin(self.V[x])[0:] == 1:
+			self.V[0xf] = 1
 		else :
-			V[0xf] = 0
-		V[x] = V[x]*2
-		pc +=2
+			self.V[0xf] = 0
+			self.V[x] = self.V[x]*2
+		self.pc +=2
 			
 	def sne_vx_vy(self):
-		x = int(opcode[3],16)
-		y = int(opcode[4],16)
-		if V[x] != V[y]:
-			pc += 2
-		pc +=2
+		x = int(self.opcode[3],16)
+		y = int(self.opcode[4],16)
+		if self.V[x] != self.V[y]:
+			self.pc += 2
+			self.pc +=2
 			
-	def ld_i_addr():
-		self.VI = int(opcode[3:],16)
+	def ld_i_addr(self):
+		self.VI = int(self.opcode[3:],16)
 		self.pc +=2
 		
 	def jp_v0_addr(self):
-		pc = int(opcode[3:],16)+V[0]
+		self.pc = int(self.opcode[3:],16)+self.V[0]
 		
 	def rnd_vx_byte(self):
-		x = int(opcode[3],16)
-		V[x] =  random.randint(0,255) & int(opcode[4:],16)
-		pc +=2
+		x = int(self.opcode[3],16)
+		self.V[x] =  random.randint(0,255) & int(self.opcode[4:],16)
+		self.pc +=2
 		
 	def drw_vx_vy_nibble(self):
-		n = int(opcode[5],16)
-		x = int (opcode[3],16)
-		y = int(opcode[4],16)
-		V[0xf] = 1
-		saved_pc = pc
-		pc = VI
-		saved_VI = VI
+		n = int(self.opcode[5], 16)
+		x = int(self.opcode[3], 16)
+		y = int(self.opcode[4], 16)
+		saved_x = self.V[x]
+		saved_y = self.V[y]
+		self.V[0xf] = 0
+		saved_pc = self.pc
+		self.pc = self.VI
+		saved_VI = self.VI
 		sprite_buffer = []
 		es = []
-		if V[x] > 63:
-			V[x] = V[x] % 63 
-		if V[y] > 31:
-			V[y] = V[y] % 31
-		while pc < saved_VI + n :
-			VI = memory[pc]
-			es = list(bin(VI)[2:].zfill(8))	
-			pc +=1
+		if self.V[x] > 63:
+			self.V[x] = self.V[x] % 63
+		if self.V[y] > 31:
+			self.V[y] = self.V[y] % 31
+		while self.pc < saved_VI + n:
+			self.VI = self.memory[self.pc]
+			es = list(bin(self.VI)[2:].zfill(8))
+			self.pc += 1
 			sprite_buffer.extend(es)
-		sprite_buffer = np.asarray(sprite_buffer,dtype=int).reshape(n,8)
+		sprite_buffer = np.asarray(sprite_buffer, dtype=int).reshape(n, 8)
 		sprite_buffer = sprite_buffer * 255
-		surface = pygame.surfarray.make_surface(sprite_buffer)
-		surface.set_colorkey(0)
-		surface = pygame.transform.scale(surface,(n*10,80))
-		surface = pygame.transform.rotate(surface,90)
-		surface = pygame.transform.flip(surface,False,True)
-		screen.blit(surface,(V[x]*10,V[y]*10))
+		width = 0
+
+		while width != 7:
+			height = 0
+			if self.V[x] + width > 63:
+				self.V[x] = (self.V[x] + width) % 63
+			if self.V[y] + height > 31:
+				self.V[y] = (self.V[y] + height) % 31
+			while height != n:
+				self.surface_array[self.V[y] + height, self.V[x] + width] = self.surface_array[self.V[y] + height, self.V[x] + width] ^ sprite_buffer[height, width]
+				if self.surface_array[self.V[y] + height, self.V[x] + width] != 0 & sprite_buffer[height, width] != 0:
+					V[0xf] = 1
+					print(V[0xf])
+				height += 1
+			width += 1
+
+		surface = pygame.pixelcopy.make_surface(self.surface_array)
+		surface = pygame.transform.scale(surface, (320, 640))
+		surface = pygame.transform.rotate(surface, 90)
+		surface = pygame.transform.flip(surface, False, True)
+		self.screen.blit(surface, (0, 0))
 		pygame.display.update()
-		VI = saved_VI 	
-		pc = saved_pc +2
+		self.VI = saved_VI
+		self.pc = saved_pc + 2
+		self.V[x] = saved_x
+		self.V[y] = saved_y
 					
 	def skp_vx(self):
-		x = int(opcode[3],16) 
-		if key[V[x]] == True:
-			pc += 2
-		pc +=2	
+		x = int(self.opcode[3],16)
+		if self.key[self.V[x]] == True:
+			self.pc += 2
+		self.pc +=2
 					
 	def sknp_vx(self):
-			x = int(opcode[3],16)
-			if key[V[x]] == False:
-				pc += 2
-			pc +=2
+		x = int(self.opcode[3],16)
+		if self.key[self.V[x]] == False:
+			self.pc += 2
+		self.pc +=2
 				
 	def ld_vx_dt(self):
-		x = int(opcode[3],16)
-		V[x] = dt
-		pc +=2
+		x = int(self.opcode[3],16)
+		self.V[x] = self.dt
+		self.pc +=2
 				
 	def ld_vx_k(self):
-		x = int(opcode[3],16)
+		x = int(self.opcode[3],16)
 		while pygame.key.get_pressed() == False:
 			pass
-		V[x] = key[True]
-		pc +=2
+			self.V[x] = self.key[True]
+		self.pc +=2
 					
 	def ld_dt_vx(self):
-		x = int(opcode[3],16)
-		dt = V[x]
-		pc +=2
+		x = int(self.opcode[3],16)
+		self.dt = self.V[x]
+		self.pc +=2
 					
 	def ld_st_vx(self):
-		x = int(opcode[3],16)
-		st = V[x]
-		pc +=2
+		x = int(self.opcode[3],16)
+		self.st = self.V[x]
+		self.pc +=2
 					
 	def add_i_vx(self):
-		x = int(opcode[3],16)
-		VI = VI + V[x]
-		pc +=2
+		x = int(self.opcode[3],16)
+		self.VI = self.VI + self.V[x]
+		self.pc +=2
 					
 	def ld_f_vx(self):
-		x = int(opcode[3],16)
-		VI = V[x] *5
-		pc +=2
+		x = int(self.opcode[3],16)
+		self.VI = self.V[x] *5
+		self.pc +=2
 					
 	def ld_b_vx(self):
-		x = int(opcode[3],16)
-		V[x] = str(V[x])
-		memory[VI] = int(V[x][0])
-		if len (V[x]) >= 2: 
-			memory[VI+1] = int(V[x][1])
-		if len (V[x]) >= 3:
-			memory[VI+2] = int(V[x][2])
-		V[x] = int(V[x]) 
-		pc +=2
+		x = int(self.opcode[3],16)
+		self.V[x] = str(self.V[x])
+		self.memory[self.VI] = int(self.V[x][0])
+		if len (self.V[x]) >= 2:
+			self.memory[self.VI+1] = int(self.V[x][1])
+		if len (self.V[x]) >= 3:
+			self.memory[self.VI+2] = int(self.V[x][2])
+		self.V[x] = int(self.V[x])
+		self.pc +=2
 					
 	def ld_i_vx(self):
-		x = int(opcode[3],16)
+		x = int(self.opcode[3],16)
 		i = 0
 		while i < x:
-			memory[VI+i] = V[i]
+			self.memory[self.VI+i] = self.V[i]
 			i += 1
-			pc +=2
+			self.pc +=2
 					
 	def ld_vx_i(self):
-		x = int(opcode[3],16)
+		x = int(self.opcode[3],16)
 		i = 0
 		while i < x:
-			V[i] = memory[VI+i]
+			self.V[i] = memory[self.VI+i]
 			i += 1
-		pc +=2
+			self.pc +=2
 
-	while True:
+	def __init__(self):
 				
-			logical_dictionarie = { '0': ld_vx_vy(),
-									'1': or_vx_vy(),
-									'2': and_vx_vy(),
-									'3': xor_vx_vy(),
-									'4': add_vx_vy(),
-									'5': sub_vx_vy(),
-									'6': shr_vx_vy(),
-									'7': subn_vx_vy(),
-									'e': shl_vx_vy()}
-											
-			misc_dictionarie = {'9e' : skp_vx(),
-								'a1' : sknp_vx(),
-								'07' : ld_vx_dt(),
-								'0a' : ld_vx_k(),
-								'15' : ld_dt_vx(),
-								'18' : ld_st_vx(),
-								'1e' : add_i_vx(),
-								'29' : ld_f_vx(),
-								'33' : ld_b_vx(),
-								'55' : ld_i_vx(),
-								'65' : ld_vx_i(),
-								'e0' : cls(),
-								'ee' : ret()}
-					
-			opcodes = { 0x1: jp_addr(),
-						0x2: call_addr(),
-						0x3: se_vx_byte(),
-						0x4: sne_vx_byte(),
-						0x5: se_vx_vy(),
-						0x6: ld_vx_byte(),
-						0x7: add_vx_byte(),
-						0x8: logical_dictionarie[opcode[5]],
-						0x9: sne_vx_vy(),
-						0xa: ld_i_addr(),
-						0xb: jp_v0_addr(),
-						0xc: rnd_vx_byte(),
-						0xd: drw_vx_vy_nibble(),
-						0xe: misc_dictionarie[opcode[-2:]],
-						0xf: misc_dictionarie[opcode[-2:]]}
+			logical_dictionarie = { '0': self.ld_vx_vy,
+									'1': self.or_vx_vy,
+									'2': self.and_vx_vy,
+									'3': self.xor_vx_vy,
+									'4': self.add_vx_vy,
+									'5': self.sub_vx_vy,
+									'6': self.shr_vx_vy,
+									'7': self.subn_vx_vy,
+									'e': self.shl_vx_vy}
 
-				
-			self.opcode = int(hex(self.memory[self.pc]<<8),16)| int(hex(self.memory[self.pc + 1]),16)
-			self.opcode = hex(self.opcode)
-			self.opcode = str(self.opcode)
-			extracted_op = int(self.opcode[:3],16)
-			print (self.opcode)
-			print(self.pc)
-			opcodes[extracted_op]
-			if self.dt > 0 :
-				time.sleep(0.16)	
-				self.dt -= 1
-			if self.st > 0 :
-				time.sleep(0.16)	
-				self.st -= 1		
+			misc_dictionarie = {'9e' : self.skp_vx,
+								'a1' : self.sknp_vx,
+								'07' : self.ld_vx_dt,
+								'0a' : self.ld_vx_k,
+								'15' : self.ld_dt_vx,
+								'18' : self.ld_st_vx,
+								'1e' : self.add_i_vx,
+								'29' : self.ld_f_vx,
+								'33' : self.ld_b_vx,
+								'55' : self.ld_i_vx,
+								'65' : self.ld_vx_i,
+								'e0' : self.cls,
+								'ee' : self.ret}
+
+			self.opcodes = { 0x0: misc_dictionarie[self.opcode[-2:]],
+						0x1: self.jp_addr,
+						0x2: self.call_addr,
+						0x3: self.se_vx_byte,
+						0x4: self.sne_vx_byte,
+						0x5: self.se_vx_vy,
+						0x6: self.ld_vx_byte,
+						0x7: self.add_vx_byte,
+						0x8: logical_dictionarie[self.opcode[5]],
+						0x9: self.sne_vx_vy,
+						0xa: self.ld_i_addr,
+						0xb: self.jp_v0_addr,
+						0xc: self.rnd_vx_byte,
+						0xd: self.drw_vx_vy_nibble,
+						0xe: misc_dictionarie[self.opcode[-2:]],
+						0xf: misc_dictionarie[self.opcode[-2:]]}
+	def cycle(self):
+			while True:
+				self.opcode = int(hex(self.memory[self.pc]<<8),16)| int(hex(self.memory[self.pc + 1]),16)
+				self.opcode = hex(self.opcode)
+				self.opcode = str(self.opcode)
+				extracted_op = int(self.opcode[:3],16)
+				print (self.opcode)
+				print(self.pc)
+				self.opcodes[extracted_op]()
+				if self.dt > 0 :
+					time.sleep(0.16)
+					self.dt -= 1
+				if self.st > 0 :
+					time.sleep(0.16)
+					self.st -= 1
+
+emu = cpu()
+load = emu.load()
+cycle= emu.cycle()
+cycle()
