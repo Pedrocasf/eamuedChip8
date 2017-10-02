@@ -53,23 +53,18 @@ class cpu():
 		0xE0, 0x90, 0x90, 0x90, 0xE0,
 		0xF0, 0x80, 0xF0, 0x80, 0xF0,
 		0xF0, 0x80, 0xF0, 0x80, 0x80]
-	while i < len (fontset):
+	for i in range(len (fontset)):
 		memory[i] = fontset[i]
-		i += 1
 	
 	with open('games/'+"BRIX","rb") as f:
-		i = 0
 		rom = f.read()
 		
-		while i < len (rom) : 
+		for i in range(len (rom)) : 
 			memory[i+pc] = rom[i]
-			i += 1
 		
-		i = 0
-		while i < len (memory): 
+		for i in range(len (memory)): 
 			memory[i] = hex(memory[i])
 			memory[i] = int(memory[i], 16) 
-			i += 1
 			
 	while True:
 		opcode = int(hex(memory[pc]<<8),16)| int(hex(memory[pc + 1]),16)
@@ -238,13 +233,13 @@ class cpu():
 			sprite_buffer = sprite_buffer * 255
 			width = 0
 			
-			while width !=7:
+			for width in range(8):
 				height = 0
 				if V[x] + width > 63:
 					V[x] = (V[x]+width) % 63
 				if V[y] + height >  31:
 					V[y] = (V[y]+height) % 31
-				while height != n:
+				for height in range(n):
 					surface_array[V[y]+height,V[x]+width] = surface_array[V[y]+height,V[x]+width] ^ sprite_buffer[height,width] 
 					if surface_array[V[y]+height,V[x]+width] != 0 & sprite_buffer[height,width] != 0:
 						V[0xf]= 1
